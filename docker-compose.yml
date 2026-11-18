@@ -1,0 +1,11 @@
+services:
+  freellmapi:
+    image: ghcr.io/tashfeenahmed/freellmapi:${SERVICE_VERSION:-latest}
+    container_name: freellmapi
+    restart: unless-stopped
+    stop_grace_period: 40s
+    env_file: .env
+    ports:
+      - "${SERVICE_PORT:-29652}:3001"
+    volumes:
+      - ./data:/app/server/data
