@@ -1,0 +1,34 @@
+# nginx fills ${SERVICE_FRAME_ANCESTORS} from the environment at start (envsubst).
+# Upstream sends X-Frame-Options: SAMEORIGIN and a CSP with frame-ancestors 'self'. Drop the first; in the CSP add the
+# allowed origins to frame-ancestors and keep every other directive as upstream sends it.
+map $upstream_http_content_security_policy $freellmapi_csp {
+    "~^(.*)frame-ancestors 'self'(.*)$" "$1frame-ancestors 'self' ${SERVICE_FRAME_ANCESTORS}$2";
+    default $upstream_http_content_security_policy;
+}
+
+map $http_upgrade $freellmapi_connection {
+    default upgrade;
+    ""      close;
+}
+
+server {
+    listen 80;
+    client_max_body_size 32m;
+
+    location / {
+        proxy_pass http://freellmapi:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $freellmapi_connection;
+        proxy_buffering off;  # streamed completions
+        proxy_read_timeout 3600s;
+
+        proxy_hide_header X-Frame-Options;
+        proxy_hide_header Content-Security-Policy;
+        add_header Content-Security-Policy $freellmapi_csp always;
+    }
+}

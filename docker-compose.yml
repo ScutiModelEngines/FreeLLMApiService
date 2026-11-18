@@ -5,7 +5,19 @@ services:
     restart: unless-stopped
     stop_grace_period: 40s
     env_file: .env
-    ports:
-      - "${SERVICE_PORT:-29652}:3001"
     volumes:
       - ./data:/app/server/data
+
+  # Only published port. Proxies to freellmapi and lets the ServiceHub origin frame the dashboard.
+  freellmapi_proxy:
+    image: nginx:1.27-alpine
+    container_name: freellmapi_proxy
+    restart: unless-stopped
+    depends_on:
+      - freellmapi
+    environment:
+      SERVICE_FRAME_ANCESTORS: ${SERVICE_FRAME_ANCESTORS:-http://scutiserver1.local:29880}
+    ports:
+      - "${SERVICE_PORT:-29652}:80"
+    volumes:
+      - ./nginx.conf.template:/etc/nginx/templates/default.conf.template:ro

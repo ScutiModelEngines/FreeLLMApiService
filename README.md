@@ -1,6 +1,6 @@
 # FreeLLMApiService
 
-FreeLLMAPI is an MIT-licensed, self-hosted router that puts free LLM provider tiers behind one OpenAI-compatible `/v1` endpoint. The dashboard and API share LAN port `29652`. [Upstream FreeLLMAPI](https://github.com/tashfeenahmed/freellmapi)
+FreeLLMAPI is an MIT-licensed, self-hosted router that puts free LLM provider tiers behind one OpenAI-compatible `/v1` endpoint. The dashboard and API share LAN port `29652`, served by a small nginx (`freellmapi_proxy`) in front of the app. It lets ServiceHub frame the dashboard by adding the hub origin to the CSP `frame-ancestors`; set `SERVICE_FRAME_ANCESTORS` in `.env` (default `http://scutiserver1.local:29880`, space separated). [Upstream FreeLLMAPI](https://github.com/tashfeenahmed/freellmapi)
 
 ## Deploy
 
